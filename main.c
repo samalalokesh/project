@@ -1,4 +1,5 @@
 #include<LPC214x.h>
+#include "defines.h"
 #include "delay.h"
 #include "types.h"
 #include "lcd.h"
@@ -9,11 +10,7 @@
 #include "rtc.h"
 #include "interrupt1.h"
 #include "interrupt2.h"
-
-#define BUZZER 5
-#define LED1 6
-#define LED2 7
-
+#include "led.h"
 
 void int_sw1(void) __irq;
 void int_sw2(void) __irq;
@@ -30,8 +27,8 @@ int main(){
 		InitKPM();
 		InitLCD();
 		Init_eint();
-		Init_eint2();
 		VICVectAddr0=(unsigned)int_sw1;
+		Init_eint2();
 		VICVectAddr1=(unsigned)int_sw2;
 		password();
 		init_rtc();
@@ -39,6 +36,18 @@ int main(){
 		while(1){
 			rtc_lcd();
 			flag = rtc_edit(flag,&num,&last,&start_hour,&end_hour,&start_min,&end_min,&start_sec,&end_sec);
+			lab_time(&start_hour,&end_hour,&start_min,&end_min,&start_sec,&end_sec);
+			if(flag==2){
+				CmdLCD(CLEAR_LCD);
+				StrLCD("Emergency..!");
+				delay_ms(500);				
+				password();
+				IOSET0 = 1<<BUZZER;
+				IOCLR0 = (1<<LED1)|(1<<LED2);
+				delay_s(2);
+				IOCLR0 = 1<<BUZZER;
+				flag=0;
+			}
 		}
 }
 
@@ -54,15 +63,8 @@ void int_sw1(void) __irq{
 }
 
 void int_sw2() __irq{
-	CmdLCD(CLEAR_LCD);
-	StrLCD("Emergency..!");
-	delay_ms(500);
-	
-	password();
-	
-	IOSET0 = 1<<BUZZER;
-	IOCLR0 = (1<<LED1)|(1<<LED2);
-	delay_s(2);
-	IOCLR0 = 1<<BUZZER;
+	flag=2;	
+	EXTINT=1<<1;
+	VICVectAddr=0;
 	
 }
