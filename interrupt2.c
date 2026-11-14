@@ -6,18 +6,16 @@
 #include "rtc.h"
 #include "delay.h"
 #include <LPC214x.h>
-void int_sw2() __irq;
+void int_sw2(void) __irq;
 
 void Init_eint2(){
 	PINSEL0&=~(3<<(3*2));
-	PINSEL0|=(3<<6);
+	PINSEL0|=0x000000C0;
 	VICIntSelect&=~(1<<15);
 	VICVectCntl1=(1<<5)|15;
 	//VICVectAddr0=(unsigned)eint0_fiq_isr;
 	VICIntEnable=(1<<15);
-	EXTINT=1<<0;
-	EXTMODE=1<<0;
+	EXTINT=(1<<1);
+	EXTMODE=1<<1;
 	EXTPOLAR=0;
 }
-
-
