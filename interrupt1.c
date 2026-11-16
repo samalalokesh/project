@@ -1,19 +1,20 @@
+//interrupt1.c
 #include "lcd.h"
-#include "lcd_definesh.h"
+#include "lcd_defines.h"
 #include "kpm.h"
 #include "kpm_defines.h"
 #include "password.h"
 #include "rtc.h"
 #include "delay.h"
 #include <LPC214x.h>
-void int_sw1() __irq;
+void int_sw1(void) __irq;
 
-void Init_eint(){
+void Init_eint(void){
 	PINSEL0&=~(3<<(1*2));
 	PINSEL0|=(3<<2);
 	VICIntSelect&=~(1<<14);
 	VICVectCntl0=(1<<5)|14;
-	//VICVectAddr0=(unsigned)eint0_fiq_isr;
+	VICVectAddr0=(unsigned)int_sw1;
 	VICIntEnable=(1<<14);
 	EXTINT=1<<0;
 	EXTMODE=1<<0;
@@ -21,25 +22,24 @@ void Init_eint(){
 }
 
 
-u32 rtc_edit(u32 flag,u32 *num,u8 *last,
+void rtc_edit(u32 *num,u8 *last,
              u32 *start_hour,u32 *end_hour,
              u32 *start_min,u32 *end_min,
              u32 *start_sec,u32 *end_sec)
 {
     u32 temp,op;
     
-    if(flag==1)
-    {
+    
         CmdLCD(CLEAR_LCD);
         StrLCD("Edit 1.rtc 2.Lab");
         op=ReadNum();
-        delay_ms(300);
-
-        if(op==0)
-            flag=0;
-
         CmdLCD(CLEAR_LCD);
+		
 
+        if(op==0){
+        CmdLCD(CLEAR_LCD);
+		return ;
+		}
         /* RTC EDITING */
         if(op==1)
         {
@@ -59,7 +59,7 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
                     HOUR=temp;
 
                 *num=0;
-                flag=0;
+                
                 CmdLCD(CLEAR_LCD);
             }
             else if(op==2)
@@ -74,7 +74,7 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
                     MIN=temp;
 
                 *num=0;
-                flag=0;
+    
                 CmdLCD(CLEAR_LCD);
             }
             else if(op==3)
@@ -89,7 +89,7 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
                     SEC=temp;
 
                 *num=0;
-                flag=0;
+            
                 CmdLCD(CLEAR_LCD);
             }
         }
@@ -117,6 +117,7 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
                         *start_hour=*num;
 
                     *num=0;
+					CmdLCD(CLEAR_LCD);
                 }
                 else if(op==2)
                 {
@@ -125,10 +126,12 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
 
                     ReadNum2(num,last);
 
-                    if(*num>*start_hour && *num<=23)
+                    if(*num>=*start_hour && *num<=23)
                         *end_hour=*num;
                     else
                         *end_hour=temp;
+					
+					CmdLCD(CLEAR_LCD);
 
                     *num=0;
                 }
@@ -148,6 +151,7 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
                         *start_min=*num;
 
                     *num=0;
+					CmdLCD(CLEAR_LCD);
                 }
                 else if(op==2)
                 {
@@ -156,12 +160,13 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
 
                     ReadNum2(num,last);
 
-                    if(*num>*start_min && *num<=59)
+                    if(*num>=*start_min && *num<=59)
                         *end_min=*num;
                     else
                         *end_min=temp;
 
                     *num=0;
+					CmdLCD(CLEAR_LCD);
                 }
             }
             else if(op==3)
@@ -179,6 +184,7 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
                         *start_sec=*num;
 
                     *num=0;
+					CmdLCD(CLEAR_LCD);
                 }
                 else if(op==2)
                 {
@@ -187,16 +193,15 @@ u32 rtc_edit(u32 flag,u32 *num,u8 *last,
 
                     ReadNum2(num,last);
 
-                    if(*num>*start_sec && *num<=59)
+                    if(*num>=*start_sec && *num<=59)
                         *end_sec=*num;
                     else
                         *end_sec=temp;
 
                     *num=0;
+					CmdLCD(CLEAR_LCD);
                 }
             }
         }
-    }
-
-    return flag;
+    
 }
