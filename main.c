@@ -3,7 +3,7 @@
 #include "delay.h"
 #include "types.h"
 #include "lcd.h"
-#include "lcd_definesh.h"
+#include "lcd_defines.h"
 #include "kpm.h"
 #include "kpm_defines.h"
 #include "password.h"
@@ -15,7 +15,7 @@
 void int_sw1(void) __irq;
 void int_sw2(void) __irq;
 
-unsigned int flag;
+volatile unsigned int flag;
 
 
 int main(){
@@ -27,16 +27,23 @@ int main(){
 		InitKPM();
 		InitLCD();
 		Init_eint();
-		VICVectAddr0=(unsigned)int_sw1;
 		Init_eint2();
-		VICVectAddr1=(unsigned)int_sw2;
+		
 		password();
 		init_rtc();
 
 		while(1){
 			rtc_lcd();
-			flag = rtc_edit(flag,&num,&last,&start_hour,&end_hour,&start_min,&end_min,&start_sec,&end_sec);
+			if(flag==1){
+			CmdLCD(CLEAR_LCD);
+			StrLCD("Interupt Occured");
+			delay_ms(500);
+			CmdLCD(CLEAR_LCD);
+			password();
+			rtc_edit(&num,&last,&start_hour,&end_hour,&start_min,&end_min,&start_sec,&end_sec);
 			lab_time(&start_hour,&end_hour,&start_min,&end_min,&start_sec,&end_sec);
+			flag = 0;	
+			}
 			if(flag==2){
 				CmdLCD(CLEAR_LCD);
 				StrLCD("Emergency..!");
@@ -46,23 +53,18 @@ int main(){
 				IOCLR0 = (1<<LED1)|(1<<LED2);
 				delay_s(2);
 				IOCLR0 = 1<<BUZZER;
-				flag=0;
+				flag = 0;
 			}
 		}
 }
 
 void int_sw1(void) __irq{
-	CmdLCD(CLEAR_LCD);
-	StrLCD("Interupt Occured");
-	delay_ms(500);
-	CmdLCD(CLEAR_LCD);
-	password();
 	flag=1;
 	EXTINT=1<<0;
 	VICVectAddr=0;
 }
 
-void int_sw2() __irq{
+void int_sw2(void) __irq{
 	flag=2;	
 	EXTINT=1<<1;
 	VICVectAddr=0;
