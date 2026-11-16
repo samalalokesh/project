@@ -23,34 +23,51 @@ void Init_eint(void){
 
 
 void rtc_edit(u32 *num,u8 *last,
-             u32 *start_hour,u32 *end_hour,
-             u32 *start_min,u32 *end_min,
-             u32 *start_sec,u32 *end_sec)
+              u32 *start_hour,u32 *end_hour,
+              u32 *start_min,u32 *end_min,
+              u32 *start_sec,u32 *end_sec)
 {
     u32 temp,op;
-    
-    
-        CmdLCD(CLEAR_LCD);
-        StrLCD("Edit 1.rtc 2.Lab");
-        op=ReadNum();
-        CmdLCD(CLEAR_LCD);
-		
 
-        if(op==0){
+    CmdLCD(CLEAR_LCD);
+    StrLCD("Edit 1.rtc 2.Lab");
+
+    op = ReadNum();
+
+    CmdLCD(CLEAR_LCD);
+
+    if(op==0)
+    {
         CmdLCD(CLEAR_LCD);
-		return ;
-		}
-        /* RTC EDITING */
+        return;
+    }
+
+    /* RTC EDITING */
+    if(op==1)
+    {
+        StrLCD("Edit1.Time");
+        CmdLCD(GOTO_LINE2_POS0);
+        StrLCD("2.Date");
+
+        op = ReadNum();
+
+        CmdLCD(CLEAR_LCD);
+
+        /* TIME EDITING */
         if(op==1)
         {
-            StrLCD("Edit1.HH2.MM3.SS");
-            op=ReadNum();
+            StrLCD("1.HH 2.MM 3.SS");
+
+            op = ReadNum();
+
             CmdLCD(CLEAR_LCD);
 
             if(op==1)
             {
                 temp=HOUR;
-                StrLCD("Enter hours");
+
+                StrLCD("Enter Hour");
+
                 ReadNum2(num,last);
 
                 if(*num<=23)
@@ -59,13 +76,15 @@ void rtc_edit(u32 *num,u8 *last,
                     HOUR=temp;
 
                 *num=0;
-                
+
                 CmdLCD(CLEAR_LCD);
             }
             else if(op==2)
             {
                 temp=MIN;
-                StrLCD("Enter Minutes");
+
+                StrLCD("Enter Min");
+
                 ReadNum2(num,last);
 
                 if(*num<=59)
@@ -74,13 +93,15 @@ void rtc_edit(u32 *num,u8 *last,
                     MIN=temp;
 
                 *num=0;
-    
+
                 CmdLCD(CLEAR_LCD);
             }
             else if(op==3)
             {
                 temp=SEC;
-                StrLCD("Enter Seconds");
+
+                StrLCD("Enter Sec");
+
                 ReadNum2(num,last);
 
                 if(*num<=59)
@@ -89,119 +110,202 @@ void rtc_edit(u32 *num,u8 *last,
                     SEC=temp;
 
                 *num=0;
-            
+
                 CmdLCD(CLEAR_LCD);
             }
         }
 
-        /* LAB EDITING */
+        /* DATE EDITING */
         else if(op==2)
         {
-            CmdLCD(CLEAR_LCD);
-            StrLCD("1.HH 2.MM 3.SS");
-            op=ReadNum();
+            StrLCD("1.DOM2.MON");
+            CmdLCD(GOTO_LINE2_POS0);
+            StrLCD("3.YEAR");
+
+            op = ReadNum();
+
             CmdLCD(CLEAR_LCD);
 
             if(op==1)
             {
-                StrLCD("1.S-hour2.E-hour");
-                op=ReadNum();
+                temp = DOM;
+
+                StrLCD("Enter DOM");
+
+                ReadNum2(num,last);
+
+                if((*num>=1)&&(*num<=31))
+                    DOM=*num;
+                else
+                    DOM=temp;
+
+                *num=0;
+
                 CmdLCD(CLEAR_LCD);
-
-                if(op==1)
-                {
-                    StrLCD("Enter S-hour");
-                    ReadNum2(num,last);
-
-                    if(*num<=23)
-                        *start_hour=*num;
-
-                    *num=0;
-					CmdLCD(CLEAR_LCD);
-                }
-                else if(op==2)
-                {
-                    StrLCD("Enter E-hour");
-                    temp=*end_hour;
-
-                    ReadNum2(num,last);
-
-                    if(*num>=*start_hour && *num<=23)
-                        *end_hour=*num;
-                    else
-                        *end_hour=temp;
-					
-					CmdLCD(CLEAR_LCD);
-
-                    *num=0;
-                }
             }
             else if(op==2)
             {
-                StrLCD("1.S-Min2.E-Min");
-                op=ReadNum();
+                temp = MONTH;
+
+                StrLCD("Enter Month");
+
+                ReadNum2(num,last);
+
+                if((*num>=1)&&(*num<=12))
+                    MONTH=*num;
+                else
+                    MONTH=temp;
+
+                *num=0;
+
                 CmdLCD(CLEAR_LCD);
-
-                if(op==1)
-                {
-                    StrLCD("Enter S-min");
-                    ReadNum2(num,last);
-
-                    if(*num<=59)
-                        *start_min=*num;
-
-                    *num=0;
-					CmdLCD(CLEAR_LCD);
-                }
-                else if(op==2)
-                {
-                    StrLCD("Enter E-min");
-                    temp=*end_min;
-
-                    ReadNum2(num,last);
-
-                    if(*num>=*start_min && *num<=59)
-                        *end_min=*num;
-                    else
-                        *end_min=temp;
-
-                    *num=0;
-					CmdLCD(CLEAR_LCD);
-                }
             }
             else if(op==3)
             {
-                StrLCD("1.S-Sec 2.E-Sec");
-                op=ReadNum();
+                temp = YEAR;
+
+                StrLCD("Enter Year");
+
+                ReadNum2(num,last);
+
+                if(*num<=99)
+                    YEAR=*num;
+                else
+                    YEAR=temp;
+
+                *num=0;
+
                 CmdLCD(CLEAR_LCD);
-
-                if(op==1)
-                {
-                    StrLCD("Enter S-sec");
-                    ReadNum2(num,last);
-
-                    if(*num<=59)
-                        *start_sec=*num;
-
-                    *num=0;
-					CmdLCD(CLEAR_LCD);
-                }
-                else if(op==2)
-                {
-                    StrLCD("Enter E-sec");
-                    temp=*end_sec;
-
-                    ReadNum2(num,last);
-
-                    if(*num>=*start_sec && *num<=59)
-                        *end_sec=*num;
-                    else
-                        *end_sec=temp;
-
-                    *num=0;
-					CmdLCD(CLEAR_LCD);
-                }
             }
         }
-    
+    }
+
+    /* LAB EDITING */
+    else if(op==2)
+    {
+        CmdLCD(CLEAR_LCD);
+        StrLCD("1.HH 2.MM 3.SS");
+
+        op=ReadNum();
+
+        CmdLCD(CLEAR_LCD);
+
+        if(op==1)
+        {
+            StrLCD("1.S-HR 2.E-HR");
+
+            op=ReadNum();
+
+            CmdLCD(CLEAR_LCD);
+
+            if(op==1)
+            {
+                StrLCD("Enter S-hour");
+
+                ReadNum2(num,last);
+
+                if(*num<=23)
+                    *start_hour=*num;
+
+                *num=0;
+
+                CmdLCD(CLEAR_LCD);
+            }
+            else if(op==2)
+            {
+                temp=*end_hour;
+
+                StrLCD("Enter E-hour");
+
+                ReadNum2(num,last);
+
+                if(*num>=*start_hour && *num<=23)
+                    *end_hour=*num;
+                else
+                    *end_hour=temp;
+
+                *num=0;
+
+                CmdLCD(CLEAR_LCD);
+            }
+        }
+        else if(op==2)
+        {
+            StrLCD("1.S-MIN2.E-MIN");
+
+            op=ReadNum();
+
+            CmdLCD(CLEAR_LCD);
+
+            if(op==1)
+            {
+                StrLCD("Enter S-min");
+
+                ReadNum2(num,last);
+
+                if(*num<=59)
+                    *start_min=*num;
+
+                *num=0;
+
+                CmdLCD(CLEAR_LCD);
+            }
+            else if(op==2)
+            {
+                temp=*end_min;
+
+                StrLCD("Enter E-min");
+
+                ReadNum2(num,last);
+
+                if(*num>=*start_min && *num<=59)
+                    *end_min=*num;
+                else
+                    *end_min=temp;
+
+                *num=0;
+
+                CmdLCD(CLEAR_LCD);
+            }
+        }
+        else if(op==3)
+        {
+            StrLCD("1.S-SEC2.E-SEC");
+
+            op=ReadNum();
+
+            CmdLCD(CLEAR_LCD);
+
+            if(op==1)
+            {
+                StrLCD("Enter S-sec");
+
+                ReadNum2(num,last);
+
+                if(*num<=59)
+                    *start_sec=*num;
+
+                *num=0;
+
+                CmdLCD(CLEAR_LCD);
+            }
+            else if(op==2)
+            {
+                temp=*end_sec;
+
+                StrLCD("Enter E-sec");
+
+                ReadNum2(num,last);
+
+                if(*num>=*start_sec && *num<=59)
+                    *end_sec=*num;
+                else
+                    *end_sec=temp;
+
+                *num=0;
+
+                CmdLCD(CLEAR_LCD);
+            }
+        }
+    }
 }
