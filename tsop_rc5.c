@@ -4,25 +4,6 @@
 #include "delay.h"
 #include "tsop_rc5.h"
 
-#define TSOP_PIN 20
-
-#define RC5_PIN ((IO0PIN >> TSOP_PIN) & 1)
-
-#define RC5_T   1778
-#define RC5_H   889
-#define RC5_Q   444
-
-#define STEP_US 20
-
-void TSOP1738_Init(void)
-{
-    // P0.20 GPIO selection
-    PINSEL1 &= ~(3 << 8);
-
-    // P0.20 input
-    IO0DIR &= ~(1 << TSOP_PIN);
-}
-
 static u8 WaitEdge(u32 level, u32 max_us)
 {
     u32 t = 0;
@@ -98,8 +79,15 @@ static u8 RC5_Receive(u32 *address,
 u8 TSOP1738_ReadFrame(u32 *address,
                       u32 *command,
                       u32 *toggle)
-{
-    int status = 0;
+{	
+	int status = 0;
+    // Configure P0.20 as GPIO instead of its alternate peripheral function
+    PINSEL1 &= ~(3 << 8);               // Set P0.20 to GPIO function (its function bits are 9:8 of PINSEL1)
+
+    // Configure the TSOP receiver pin as input
+    IO0DIR  &= ~(1 << TSOP_PIN);        // Make P0.20 an input (TSOP output)
+
+    
 
     // No IR signal
     if(RC5_PIN == 1)
