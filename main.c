@@ -48,7 +48,6 @@ int main()
 		while(1)
 		{
 			rtc_lcd();
-			lab_time(&start_hour,&end_hour,&start_min,&end_min,&start_sec,&end_sec);
 			
 			 if(TSOP1738_ReadFrame(&ir_address,
                               &ir_command,
