@@ -2,7 +2,7 @@
 #include <LPC214x.h>
 #include "types.h"
 #include "delay.h"
-#include "tsop1738.h"
+#include "tsop_rc5.h"
 
 #define TSOP_PIN 20
 
@@ -42,8 +42,9 @@ static u8 WaitEdge(u32 level, u32 max_us)
 static void WaitIdle(void)
 {
     u32 t = 0;
+	u32 timeout = 0;
 
-    while(t < 4000)
+    while(t < 4000 && timeout < 20000)
     {
         if(RC5_PIN == 0)
             t = 0;
@@ -51,6 +52,7 @@ static void WaitIdle(void)
             t += STEP_US;
 
         delay_us(STEP_US);
+		timeout+= STEP_US;
     }
 }
 
@@ -97,7 +99,7 @@ u8 TSOP1738_ReadFrame(u32 *address,
                       u32 *command,
                       u32 *toggle)
 {
-    u8 status = 0;
+    int status = 0;
 
     // No IR signal
     if(RC5_PIN == 1)
